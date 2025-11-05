@@ -107,8 +107,16 @@ def create_augmented_dataloader(args, dataset):
     # dataloader will be for the original training split augmented with 5k random transformed examples from the training set.
     # You may find it helpful to see how the dataloader was created at other place in this code.
 
-    raise NotImplementedError
+    train_original = dataset["train"]
+    aug_subset = train_original.shuffle(seed=42).select(range(5000))
+    aug_transformed = aug_subset.map(custom_transform, load_from_cache_file=False)
+    aug_transformed = aug_transformed.map(tokenize_function, batched=True, load_from_cache_file=False)
+    aug_transformed = aug_transformed.remove_columns(["text"])
+    aug_transformed = aug_transformed.rename_column("label", "labels")
+    aug_transformed.set_format("torch")
 
+    full_train = datasets.concatenate_datasets([tokenized_dataset["train"], aug_transformed])
+    train_dataloader = DataLoader(full_train, shuffle=True, batch_size=args.batch_size)
     ##### YOUR CODE ENDS HERE ######
 
     return train_dataloader
