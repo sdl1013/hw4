@@ -50,8 +50,8 @@ def custom_transform(example):
     detok = TreebankWordDetokenizer()
 
     # probabilities of applying transformations
-    synonym_prob = 0.20
-    typo_prob = 0.08
+    synonym_prob = 0.30
+    typo_prob = 0.15
 
     keyboard_neighbors = {
         'a': 'qs',
