@@ -80,10 +80,19 @@ def custom_transform(example):
 
         if random.random() < typo_prob:
             chars = list(w)
-            for idx, ch in enumerate(chars):
-                if ch.lower() in keyboard_neighbors and random.random() < 0.1:
+            idxs = list(range(len(chars)))
+            random.shuffle(idxs)
+            replaced = False
+
+            for idx in idxs:
+                ch = chars[idx]
+                if ch.lower() in keyboard_neighbors:
                     chars[idx] = random.choice(keyboard_neighbors[ch.lower()])
-            w = "".join(chars)
+                    replaced = True
+                    break
+
+            if replaced:
+                w = "".join(chars)
 
         new_words.append(w)
 
