@@ -44,7 +44,48 @@ def custom_transform(example):
 
     # You should update example["text"] using your transformation
 
-    raise NotImplementedError
+    text = example["text"]
+    words = word_tokenize(text)
+    new_words = []
+    detok = TreebankWordDetokenizer()
+
+    # probabilities of applying transformations
+    synonym_prob = 0.10
+    typo_prob = 0.05
+
+    keyboard_neighbors = {
+        'a': 'qs',
+        's': 'adw',
+        'd': 'sfe',
+        'e': 'drw',
+        'r': 'etf',
+        't': 'ryg',
+        'n': 'bhm',
+        'm': 'jkn',
+        'i': 'uok',
+        'o': 'ipk',
+    }
+
+    for word in words:
+        w = word
+
+        if random.random() < synonym_prob:
+            synsets = wordnet.synsets(w)
+            if synsets:
+                lemmas = synsets[0].lemmas()
+                if lemmas:
+                    synonym = lemmas[0].name()
+                    if synonym != w and synonym.isalpha():
+                        w = synonym
+
+        elif random.random() < typo_prob and w.lower() in keyboard_neighbors:
+            neighbors = keyboard_neighbors[w.lower()]
+            w = random.choice(neighbors)
+
+        new_words.append(w)
+
+    example["text"] = detok.detokenize(new_words)
+
 
     ##### YOUR CODE ENDS HERE ######
 
