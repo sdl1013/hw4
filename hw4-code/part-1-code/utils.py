@@ -78,7 +78,7 @@ def custom_transform(example):
                     if synonym != w and synonym.isalpha():
                         w = synonym
 
-        elif random.random() < typo_prob and w.lower() in keyboard_neighbors:
+        if random.random() < typo_prob and w.lower() in keyboard_neighbors:
             neighbors = keyboard_neighbors[w.lower()]
             w = random.choice(neighbors)
 
