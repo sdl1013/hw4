@@ -10,6 +10,7 @@
 
 
 module purge
+source ~/.bashrc
 conda activate hw4-part-2-nlp
 nvidia-smi
 
