@@ -144,7 +144,7 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
     model.eval()
     total_loss = 0
     total_tokens = 0
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(ignore_index=PAD_IDX)
     
     from transformers import T5TokenizerFast
     tokenizer = T5TokenizerFast.from_pretrained('google-t5/t5-small')
@@ -163,9 +163,12 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
                 attention_mask=encoder_mask,
                 decoder_input_ids=decoder_input,
             )['logits']
-            
-            non_pad = decoder_targets != PAD_IDX
-            loss = criterion(logits[non_pad], decoder_targets[non_pad])
+
+            loss = criterion(
+                logits.view(-1, logits.size(-1)),
+                decoder_targets.view(-1)
+            )
+            non_pad = decoder_targets != PAD_IDX          
             
             num_tokens = torch.sum(non_pad).item()
             total_loss += loss.item() * num_tokens
@@ -175,9 +178,9 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
             generated_ids = model.generate(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
+                decoder_input_ids=initial_decoder_inputs, 
                 max_length=512,
                 num_beams=4,
-                no_repeat_ngram_size=3,
                 early_stopping=True
             )
             
@@ -219,9 +222,9 @@ def test_inference(args, model, test_loader, model_sql_path, model_record_path):
             generated_ids = model.generate(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
+                decoder_input_ids=initial_decoder_inputs,
                 max_length=512,
                 num_beams=4,
-                no_repeat_ngram_size=3,
                 early_stopping=True
             )
             
