@@ -123,7 +123,7 @@ def normal_collate_fn(batch):
     decoder_targets_list = []
     
     for i in range(len(batch)):
-        bos_token = decoder_initial_input_ids[i]
+        bos_token = decoder_initial_input_ids[i][:1]
         sql_tokens = decoder_output_ids[i]
         
         decoder_input = torch.cat([bos_token, sql_tokens[:-1]])
