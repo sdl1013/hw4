@@ -39,8 +39,9 @@ class T5Dataset(Dataset):
         if split == 'test':
             data = []
             for nl_query in nl_queries:
+                input_text = f"translate English to SQL: {nl_query}"
                 encoder_input = tokenizer(
-                    nl_query,
+                    input_text,
                     max_length=256,
                     truncation=True,
                     return_tensors='pt'
@@ -60,8 +61,9 @@ class T5Dataset(Dataset):
             
             data = []
             for nl_query, sql_query in zip(nl_queries, sql_queries):
+                input_text = f"translate English to SQL: {nl_query}"
                 encoder_input = tokenizer(
-                    nl_query,
+                    input_text,
                     max_length=256,
                     truncation=True,
                     return_tensors='pt'
@@ -125,9 +127,8 @@ def normal_collate_fn(batch):
         sql_tokens = decoder_output_ids[i]
         
         decoder_input = torch.cat([bos_token, sql_tokens[:-1]])
-        decoder_target = torch.cat([sql_tokens, torch.tensor([PAD_IDX])])
         decoder_inputs_list.append(decoder_input)
-        decoder_targets_list.append(decoder_target)
+        decoder_targets_list.append(sql_tokens)
     
     decoder_inputs = pad_sequence(decoder_inputs_list, batch_first=True, padding_value=PAD_IDX)
     decoder_targets = pad_sequence(decoder_targets_list, batch_first=True, padding_value=PAD_IDX)
