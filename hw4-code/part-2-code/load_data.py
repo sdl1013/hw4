@@ -125,7 +125,7 @@ def normal_collate_fn(batch):
         sql_tokens = decoder_output_ids[i]
         
         decoder_input = torch.cat([bos_token, sql_tokens[:-1]])
-        decoder_target = sql_tokens[1:] 
+        decoder_target = torch.cat([sql_tokens, torch.tensor([PAD_IDX])])
         decoder_inputs_list.append(decoder_input)
         decoder_targets_list.append(decoder_target)
     
