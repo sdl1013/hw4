@@ -49,12 +49,13 @@ class T5Dataset(Dataset):
                     return_tensors='pt'
                 )
                 
-                decoder_initial = tokenizer('<extra_id_0>', return_tensors='pt')
-                
+                #decoder_initial = tokenizer('<extra_id_0>', return_tensors='pt')
+                decoder_start_token_id = tokenizer.pad_token_id
                 data.append({
                     'encoder_input_ids': encoder_input['input_ids'].squeeze(0),
                     'encoder_attention_mask': encoder_input['attention_mask'].squeeze(0),
-                    'decoder_initial_input_ids': decoder_initial['input_ids'].squeeze(0)
+                    #'decoder_initial_input_ids': decoder_initial['input_ids'].squeeze(0)
+                    'decoder_start_token_id': decoder_start_token_id
                 })
         else:
             sql_path = os.path.join(data_folder, f'{split}.sql')
@@ -80,13 +81,14 @@ class T5Dataset(Dataset):
                     add_special_tokens=True
                 )
                 
-                decoder_initial = tokenizer('<extra_id_0>', return_tensors='pt')
-                
+                #decoder_initial = tokenizer('<extra_id_0>', return_tensors='pt')
+                decoder_start_token_id = tokenizer.pad_token_id
                 data.append({
                     'encoder_input_ids': encoder_input['input_ids'].squeeze(0),
                     'encoder_attention_mask': encoder_input['attention_mask'].squeeze(0),
                     'decoder_output_ids': decoder_output['input_ids'].squeeze(0),
-                    'decoder_initial_input_ids': decoder_initial['input_ids'].squeeze(0)
+                    #'decoder_initial_input_ids': decoder_initial['input_ids'].squeeze(0)
+                    'decoder_start_token_id': decoder_start_token_id
                 })
         
         return data
@@ -116,22 +118,23 @@ def normal_collate_fn(batch):
     encoder_input_ids = [item['encoder_input_ids'] for item in batch]
     encoder_attention_mask = [item['encoder_attention_mask'] for item in batch]
     decoder_output_ids = [item['decoder_output_ids'] for item in batch]
-    decoder_initial_input_ids = [item['decoder_initial_input_ids'] for item in batch]
-    
+    #decoder_initial_input_ids = [item['decoder_initial_input_ids'] for item in batch]
+    decoder_start_token_id = batch[0]['decoder_start_token_id']
     encoder_ids = pad_sequence(encoder_input_ids, batch_first=True, padding_value=PAD_IDX)
     encoder_mask = pad_sequence(encoder_attention_mask, batch_first=True, padding_value=0)
     
-    initial_decoder_inputs = pad_sequence(decoder_initial_input_ids, batch_first=True, padding_value=PAD_IDX)
-    
+    #initial_decoder_inputs = pad_sequence(decoder_initial_input_ids, batch_first=True, padding_value=PAD_IDX)
+    initial_decoder_inputs = torch.full((len(batch), 1), decoder_start_token_id, dtype=torch.long)
     decoder_inputs_list = []
     decoder_targets_list = []
     
     for i in range(len(batch)):
         #bos_token = decoder_initial_input_ids[i][:1]
         sql_tokens = decoder_output_ids[i]
-        bos = decoder_initial_input_ids[i]
+        #bos = decoder_initial_input_ids[i]
 
-        decoder_input = torch.cat([bos, sql_tokens[:-1]])
+        #decoder_input = torch.cat([bos, sql_tokens[:-1]])
+        decoder_input = torch.cat([torch.tensor([decoder_start_token_id]), sql_tokens[:-1]])
         decoder_inputs_list.append(decoder_input)
         decoder_targets_list.append(sql_tokens)
     
@@ -155,14 +158,15 @@ def test_collate_fn(batch):
     '''
     encoder_input_ids = [item['encoder_input_ids'] for item in batch]
     encoder_attention_mask = [item['encoder_attention_mask'] for item in batch]
-    decoder_initial_input_ids = [item['decoder_initial_input_ids'] for item in batch]
-    
+    #decoder_initial_input_ids = [item['decoder_initial_input_ids'] for item in batch]
+    decoder_start_token_id = batch[0]['decoder_start_token_id']
     encoder_ids = pad_sequence(encoder_input_ids, batch_first=True, padding_value=PAD_IDX)
     encoder_mask = pad_sequence(encoder_attention_mask, batch_first=True, padding_value=0)
     
     #bos_list = [x[:1] for x in decoder_initial_input_ids]
     #initial_decoder_inputs = pad_sequence(bos_list, batch_first=True, padding_value=PAD_IDX)
-    initial_decoder_inputs = pad_sequence(decoder_initial_input_ids, batch_first=True, padding_value=PAD_IDX)
+    #initial_decoder_inputs = pad_sequence(decoder_initial_input_ids, batch_first=True, padding_value=PAD_IDX)
+    initial_decoder_inputs = torch.full((len(batch), 1), decoder_start_token_id, dtype=torch.long)
     return encoder_ids, encoder_mask, initial_decoder_inputs
 
 def get_dataloader(batch_size, split):
