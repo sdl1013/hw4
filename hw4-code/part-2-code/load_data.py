@@ -76,7 +76,8 @@ class T5Dataset(Dataset):
                     sql_query,
                     max_length=512,
                     truncation=True,
-                    return_tensors='pt'
+                    return_tensors='pt',
+                    add_special_tokens=True
                 )
                 
                 decoder_initial = tokenizer('<extra_id_0>', return_tensors='pt')
