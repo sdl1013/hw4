@@ -1,8 +1,9 @@
 #!/bin/bash
+#SBATCH --partition=a100_short
 #SBATCH --job-name=t5_train
 #SBATCH --nodes=1
-#SBATCH --gres=gpu:1
-#SBATCH --mem=24GB
+#SBATCH --gres=gpu:a100:1
+#SBATCH --mem=64GB
 #SBATCH --time=04:00:00
 #SBATCH --output=logs/t5_train_%j.out
 #SBATCH --error=logs/t5_train_%j.err
