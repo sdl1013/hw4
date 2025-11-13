@@ -3,7 +3,7 @@
 #SBATCH --partition=v100
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
-#SBATCH --mem=64GB
+#SBATCH --mem=32GB
 #SBATCH --time=06:00:00
 #SBATCH --output=logs/t5_train_%j.out
 #SBATCH --error=logs/t5_train_%j.err
