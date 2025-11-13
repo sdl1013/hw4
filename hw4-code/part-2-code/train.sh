@@ -3,8 +3,8 @@
 #SBATCH --partition=v100
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
-#SBATCH --mem=32GB
-#SBATCH --time=04:00:00
+#SBATCH --mem=64GB
+#SBATCH --time=06:00:00
 #SBATCH --output=logs/t5_train_%j.out
 #SBATCH --error=logs/t5_train_%j.err
 #SBATCH --cpus-per-task=4
@@ -25,8 +25,8 @@ python train_t5.py \
     --patience_epochs 3 \
     --num_warmup_epochs 1 \
     --scheduler_type cosine \
-    --batch_size 8 \
-    --test_batch_size 8 \
-    --experiment_name baseline_add_prefix_3
+    --batch_size 16 \
+    --test_batch_size 16 \
+    --experiment_name baseline_add_prefix_4
 
 
