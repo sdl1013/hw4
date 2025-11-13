@@ -19,7 +19,7 @@ mkdir -p logs checkpoints
 
 python train_t5.py \
     --finetune \
-    --learning_rate 1e-4 \
+    --learning_rate 5e-5 \
     --weight_decay 0.01 \
     --max_n_epochs 10 \
     --patience_epochs 3 \
@@ -27,6 +27,6 @@ python train_t5.py \
     --scheduler_type cosine \
     --batch_size 16 \
     --test_batch_size 16 \
-    --experiment_name baseline_3
+    --experiment_name baseline_4
 
 
