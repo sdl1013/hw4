@@ -36,11 +36,12 @@ class T5Dataset(Dataset):
         with open(nl_path, 'r') as f:
             nl_queries = [line.strip() for line in f.readlines()]
         
+        
         if split == 'test':
             data = []
             for nl_query in nl_queries:
-                #input_text = f"translate English to SQL: {nl_query}"
-                input_text = f"Generate the SQL query for the following question:\n{nl_query}\nSQL:"
+                input_text = f"translate English to SQL: {nl_query}"
+                #input_text = f"Generate the SQL query for the following question:\n{nl_query}\nSQL:"
                 encoder_input = tokenizer(
                     input_text,
                     max_length=256,
@@ -62,8 +63,8 @@ class T5Dataset(Dataset):
             
             data = []
             for nl_query, sql_query in zip(nl_queries, sql_queries):
-                #input_text = f"translate English to SQL: {nl_query}"
-                input_text = f"Generate the SQL query for the following question:\n{nl_query}\nSQL:"
+                input_text = f"translate English to SQL: {nl_query}"
+                #input_text = f"Generate the SQL query for the following question:\n{nl_query}\nSQL:"
                 encoder_input = tokenizer(
                     input_text,
                     max_length=256,
@@ -125,10 +126,11 @@ def normal_collate_fn(batch):
     decoder_targets_list = []
     
     for i in range(len(batch)):
-        bos_token = decoder_initial_input_ids[i][:1]
+        #bos_token = decoder_initial_input_ids[i][:1]
         sql_tokens = decoder_output_ids[i]
-        
-        decoder_input = torch.cat([bos_token, sql_tokens[:-1]])
+        bos = decoder_initial_input_ids[i]
+
+        decoder_input = torch.cat([bos, sql_tokens[:-1]])
         decoder_inputs_list.append(decoder_input)
         decoder_targets_list.append(sql_tokens)
     
@@ -157,8 +159,9 @@ def test_collate_fn(batch):
     encoder_ids = pad_sequence(encoder_input_ids, batch_first=True, padding_value=PAD_IDX)
     encoder_mask = pad_sequence(encoder_attention_mask, batch_first=True, padding_value=0)
     
-    bos_list = [x[:1] for x in decoder_initial_input_ids]
-    initial_decoder_inputs = pad_sequence(bos_list, batch_first=True, padding_value=PAD_IDX)
+    #bos_list = [x[:1] for x in decoder_initial_input_ids]
+    #initial_decoder_inputs = pad_sequence(bos_list, batch_first=True, padding_value=PAD_IDX)
+    initial_decoder_inputs = pad_sequence(decoder_initial_input_ids, batch_first=True, padding_value=PAD_IDX)
     return encoder_ids, encoder_mask, initial_decoder_inputs
 
 def get_dataloader(batch_size, split):
