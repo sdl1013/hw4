@@ -28,6 +28,9 @@ def initialize_model(args):
         model = T5ForConditionalGeneration(config)
         print("Initialized T5-small model from scratch")
     
+    from transformers import T5TokenizerFast
+    tokenizer = T5TokenizerFast.from_pretrained('google-t5/t5-small')
+    model.config.decoder_start_token_id = tokenizer.pad_token_id
     model = model.to(DEVICE)
     return model
 
