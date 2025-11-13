@@ -10,8 +10,6 @@
 #SBATCH --cpus-per-task=4
 
 
-module purge
-ml anaconda3/latest
 source ~/.bashrc
 conda activate hw4-part-2-nlp
 nvidia-smi
