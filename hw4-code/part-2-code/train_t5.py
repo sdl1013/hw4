@@ -47,13 +47,16 @@ def get_args():
     # Data hyperparameters
     parser.add_argument('--batch_size', type=int, default=16)
     parser.add_argument('--test_batch_size', type=int, default=16)
+    parser.add_argument('--resume', action='store_true',
+                        help="Resume training from last checkpoint")
+    parser.add_argument('--resume_from_best', action='store_true',
+                        help="Resume from best checkpoint instead of last")
+
 
     args = parser.parse_args()
     return args
 
-def train(args, model, train_loader, dev_loader, optimizer, scheduler):
-    best_f1 = -1
-    epochs_since_improvement = 0
+def train(args, model, train_loader, dev_loader, optimizer, scheduler,start_epoch=0, best_f1=-1, epochs_since_improvement=0):  
 
     model_type = 'ft' if args.finetune else 'scr'
     checkpoint_dir = os.path.join('checkpoints', f'{model_type}_experiments', args.experiment_name)
@@ -64,7 +67,7 @@ def train(args, model, train_loader, dev_loader, optimizer, scheduler):
     gt_record_path = os.path.join(f'records/ground_truth_dev.pkl')
     model_sql_path = os.path.join(f'results/t5_{model_type}_{experiment_name}_dev.sql')
     model_record_path = os.path.join(f'records/t5_{model_type}_{experiment_name}_dev.pkl')
-    for epoch in range(args.max_n_epochs):
+    for epoch in range(start_epoch, args.max_n_epochs):
         tr_loss = train_epoch(args, model, train_loader, optimizer, scheduler)
         print(f"Epoch {epoch}: Average train loss was {tr_loss}")
 
@@ -91,11 +94,12 @@ def train(args, model, train_loader, dev_loader, optimizer, scheduler):
         else:
             epochs_since_improvement += 1
 
-        save_model(checkpoint_dir, model, best=False)
+        save_model(checkpoint_dir, model, optimizer, scheduler, epoch, best_f1, epochs_since_improvement, best=False)
         if epochs_since_improvement == 0:
-            save_model(checkpoint_dir, model, best=True)
+            save_model(checkpoint_dir, model, optimizer, scheduler, epoch, best_f1, epochs_since_improvement, best=True)
 
         if epochs_since_improvement >= args.patience_epochs:
+            print(f"Early stopping at epoch {epoch}")
             break
 
 def train_epoch(args, model, train_loader, optimizer, scheduler):
@@ -144,7 +148,7 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
     model.eval()
     total_loss = 0
     total_tokens = 0
-    criterion = nn.CrossEntropyLoss(ignore_index=PAD_IDX)
+    criterion = nn.CrossEntropyLoss()
     
     from transformers import T5TokenizerFast
     tokenizer = T5TokenizerFast.from_pretrained('google-t5/t5-small')
@@ -164,21 +168,18 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
                 decoder_input_ids=decoder_input,
             )['logits']
 
-            loss = criterion(
-                logits.view(-1, logits.size(-1)),
-                decoder_targets.view(-1)
-            )
-            non_pad = decoder_targets != PAD_IDX          
+            non_pad = decoder_targets != PAD_IDX  
+            loss = criterion(logits[non_pad], decoder_targets[non_pad])        
             
             num_tokens = torch.sum(non_pad).item()
             total_loss += loss.item() * num_tokens
             total_tokens += num_tokens
             
-            initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
+            #initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
             generated_ids = model.generate(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
-                decoder_input_ids=initial_decoder_inputs, 
+                #decoder_input_ids=initial_decoder_inputs, 
                 max_length=384,
                 num_beams=4,
                 early_stopping=True
@@ -186,6 +187,7 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
             
             for gen_ids in generated_ids:
                 generated_query = tokenizer.decode(gen_ids, skip_special_tokens=True)
+                generated_query = generated_query.strip()
                 all_generated_queries.append(generated_query)
 
     save_queries_and_records(all_generated_queries, model_sql_path, model_record_path)
@@ -222,7 +224,7 @@ def test_inference(args, model, test_loader, model_sql_path, model_record_path):
             generated_ids = model.generate(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
-                decoder_input_ids=initial_decoder_inputs,
+                #decoder_input_ids=initial_decoder_inputs,
                 max_length=384,
                 num_beams=4,
                 early_stopping=True
@@ -230,6 +232,7 @@ def test_inference(args, model, test_loader, model_sql_path, model_record_path):
             
             for gen_ids in generated_ids:
                 generated_query = tokenizer.decode(gen_ids, skip_special_tokens=True)
+                generated_query = generated_query.strip()
                 all_generated_queries.append(generated_query)
     save_queries_and_records(all_generated_queries, model_sql_path, model_record_path)
     print(f"Saved test predictions to {model_sql_path} and {model_record_path}")
@@ -244,14 +247,34 @@ def main():
 
     # Load the data and the model
     train_loader, dev_loader, test_loader = load_t5_data(args.batch_size, args.test_batch_size)
-    model = initialize_model(args)
-    optimizer, scheduler = initialize_optimizer_and_scheduler(args, model, len(train_loader))
+    if args.resume:   
+        model_type = 'ft' if args.finetune else 'scr'
+        checkpoint_dir = os.path.join('checkpoints', f'{model_type}_experiments', args.experiment_name)
+        args.checkpoint_dir = checkpoint_dir
+        
+        temp_model = initialize_model(args)
+        optimizer, scheduler = initialize_optimizer_and_scheduler(args, temp_model, len(train_loader))
+        del temp_model
+        
+        model, start_epoch, best_f1, epochs_since_improvement = load_model_from_checkpoint(
+            args, 
+            optimizer=optimizer, 
+            scheduler=scheduler, 
+            best=args.resume_from_best
+        )
+    else:
+        model = initialize_model(args)
+        optimizer, scheduler = initialize_optimizer_and_scheduler(args, model, len(train_loader))
+        start_epoch = 0
+        best_f1 = -1
+        epochs_since_improvement = 0
+
 
     # Train 
-    train(args, model, train_loader, dev_loader, optimizer, scheduler)
+    train(args, model, train_loader, dev_loader, optimizer, scheduler, start_epoch, best_f1, epochs_since_improvement)
 
     # Evaluate
-    model = load_model_from_checkpoint(args, best=True)
+    model, _, _, _ = load_model_from_checkpoint(args, best=True)
     model.eval()
     
     # Dev set
