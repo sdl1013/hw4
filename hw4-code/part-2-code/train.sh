@@ -1,6 +1,5 @@
 #!/bin/bash
 #SBATCH --job-name=t5_train
-#SBATCH --partition=v100
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:1
 #SBATCH --mem=32GB
