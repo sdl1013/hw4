@@ -39,9 +39,9 @@ class T5Dataset(Dataset):
         if split == 'test':
             data = []
             for nl_query in nl_queries:
-                input_text = f"translate English to SQL: {nl_query}"
+                #input_text = f"translate English to SQL: {nl_query}"
                 encoder_input = tokenizer(
-                    input_text,
+                    nl_query,
                     max_length=256,
                     truncation=True,
                     return_tensors='pt'
@@ -61,9 +61,9 @@ class T5Dataset(Dataset):
             
             data = []
             for nl_query, sql_query in zip(nl_queries, sql_queries):
-                input_text = f"translate English to SQL: {nl_query}"
+                #input_text = f"translate English to SQL: {nl_query}"
                 encoder_input = tokenizer(
-                    input_text,
+                    nl_query,
                     max_length=256,
                     truncation=True,
                     return_tensors='pt'
