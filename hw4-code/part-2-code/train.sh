@@ -21,12 +21,12 @@ python train_t5.py \
     --finetune \
     --learning_rate 5e-5 \
     --weight_decay 0.01 \
-    --max_n_epochs 10 \
+    --max_n_epochs 20 \
     --patience_epochs 3 \
     --num_warmup_epochs 1 \
     --scheduler_type cosine \
     --batch_size 16 \
     --test_batch_size 16 \
-    --experiment_name prefix_1
+    --experiment_name prefix_1_2
 
 
