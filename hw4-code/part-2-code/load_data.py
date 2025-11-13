@@ -39,9 +39,9 @@ class T5Dataset(Dataset):
         if split == 'test':
             data = []
             for nl_query in nl_queries:
-                #input_text = f"translate English to SQL: {nl_query}"
+                input_text = f"translate English to SQL: {nl_query}"
                 encoder_input = tokenizer(
-                    nl_query,
+                    input_text,
                     max_length=256,
                     truncation=True,
                     return_tensors='pt'
@@ -61,9 +61,9 @@ class T5Dataset(Dataset):
             
             data = []
             for nl_query, sql_query in zip(nl_queries, sql_queries):
-                #input_text = f"translate English to SQL: {nl_query}"
+                input_text = f"translate English to SQL: {nl_query}"
                 encoder_input = tokenizer(
-                    nl_query,
+                    input_text,
                     max_length=256,
                     truncation=True,
                     return_tensors='pt'
@@ -155,8 +155,8 @@ def test_collate_fn(batch):
     encoder_ids = pad_sequence(encoder_input_ids, batch_first=True, padding_value=PAD_IDX)
     encoder_mask = pad_sequence(encoder_attention_mask, batch_first=True, padding_value=0)
     
-    initial_decoder_inputs = pad_sequence(decoder_initial_input_ids, batch_first=True, padding_value=PAD_IDX)
-    
+    bos_list = [x[:1] for x in decoder_initial_input_ids]
+    initial_decoder_inputs = pad_sequence(bos_list, batch_first=True, padding_value=PAD_IDX)
     return encoder_ids, encoder_mask, initial_decoder_inputs
 
 def get_dataloader(batch_size, split):
