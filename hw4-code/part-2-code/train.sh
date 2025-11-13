@@ -24,6 +24,8 @@ python train_t5.py \
     --patience_epochs 3 \
     --num_warmup_epochs 1 \
     --scheduler_type cosine \
+    --batch_size 8 \
+    --test_batch_size 8 \
     --experiment_name baseline_2
 
 
