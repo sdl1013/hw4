@@ -26,6 +26,6 @@ python train_t5.py \
     --scheduler_type cosine \
     --batch_size 8 \
     --test_batch_size 8 \
-    --experiment_name baseline_2
+    --experiment_name baseline_add_prefix_3
 
 
