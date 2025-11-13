@@ -161,7 +161,7 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
             encoder_mask = encoder_mask.to(DEVICE)
             decoder_input = decoder_input.to(DEVICE)
             decoder_targets = decoder_targets.to(DEVICE)
-            initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
+            #initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
             logits = model(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
@@ -175,7 +175,12 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
             total_loss += loss.item() * num_tokens
             total_tokens += num_tokens
             
-            
+            initial_decoder_inputs = torch.full(
+                (encoder_input.size(0), 1),
+                tokenizer.pad_token_id,
+                dtype=torch.long,
+                device=DEVICE
+            )
             generated_ids = model.generate(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
@@ -219,8 +224,13 @@ def test_inference(args, model, test_loader, model_sql_path, model_record_path):
         for encoder_input, encoder_mask, initial_decoder_inputs in tqdm(test_loader):
             encoder_input = encoder_input.to(DEVICE)
             encoder_mask = encoder_mask.to(DEVICE)
-            initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
-            
+            #initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
+            initial_decoder_inputs = torch.full(
+                (encoder_input.size(0), 1),
+                tokenizer.pad_token_id,
+                dtype=torch.long,
+                device=DEVICE
+            )
             generated_ids = model.generate(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
