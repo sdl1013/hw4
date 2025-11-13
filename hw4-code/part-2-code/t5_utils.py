@@ -39,7 +39,7 @@ def mkdir(dirpath):
         except FileExistsError:
             pass
 
-def save_model(checkpoint_dir, model, best):
+def save_model(checkpoint_dir, model, optimizer, scheduler, epoch, best_f1, epochs_since_improvement, best=False):
     # Save model checkpoint to be able to load the model later
     mkdir(checkpoint_dir)
     
@@ -47,13 +47,21 @@ def save_model(checkpoint_dir, model, best):
         save_path = os.path.join(checkpoint_dir, 'best_model.pt')
     else:
         save_path = os.path.join(checkpoint_dir, 'last_model.pt')
-    torch.save({
+    checkpoint = {
+        'epoch': epoch,
         'model_state_dict': model.state_dict(),
-    }, save_path)
+        'optimizer_state_dict': optimizer.state_dict() if optimizer else None,
+        'scheduler_state_dict': scheduler.state_dict() if scheduler else None,
+        'best_f1': best_f1,
+        'epochs_since_improvement': epochs_since_improvement,
+    }
+    
+    torch.save(checkpoint, save_path)
     print(f"Saved {'best' if best else 'last'} model to {save_path}")
 
 
-def load_model_from_checkpoint(args, best):
+
+def load_model_from_checkpoint(args, optimizer=None, scheduler=None, best=False):
     # Load model from a checkpoint
     model = initialize_model(args)
     
@@ -62,15 +70,36 @@ def load_model_from_checkpoint(args, best):
     else:
         checkpoint_path = os.path.join(args.checkpoint_dir, 'last_model.pt')
     
+    start_epoch = 0
+    best_f1 = -1
+    epochs_since_improvement = 0
+    
     if os.path.exists(checkpoint_path):
         checkpoint = torch.load(checkpoint_path, map_location=DEVICE)
         model.load_state_dict(checkpoint['model_state_dict'])
+        
+        if optimizer is not None and 'optimizer_state_dict' in checkpoint and checkpoint['optimizer_state_dict'] is not None:
+            optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            print(f"Loaded optimizer state")
+        
+        if scheduler is not None and 'scheduler_state_dict' in checkpoint and checkpoint['scheduler_state_dict'] is not None:
+            scheduler.load_state_dict(checkpoint['scheduler_state_dict'])
+            print(f"Loaded scheduler state")
+
+        if 'epoch' in checkpoint:
+            start_epoch = checkpoint['epoch'] + 1
+        if 'best_f1' in checkpoint:
+            best_f1 = checkpoint['best_f1']
+        if 'epochs_since_improvement' in checkpoint:
+            epochs_since_improvement = checkpoint['epochs_since_improvement']
+        
         print(f"Loaded {'best' if best else 'last'} model from {checkpoint_path}")
+        print(f"Resuming from epoch {start_epoch}, best_f1={best_f1:.4f}")
     else:
         print(f"Warning: Checkpoint not found at {checkpoint_path}")
     
     model = model.to(DEVICE)
-    return model
+    return model, start_epoch, best_f1, epochs_since_improvement
 
 def initialize_optimizer_and_scheduler(args, model, epoch_length):
     optimizer = initialize_optimizer(args, model)
