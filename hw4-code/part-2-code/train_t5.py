@@ -161,7 +161,7 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
             encoder_mask = encoder_mask.to(DEVICE)
             decoder_input = decoder_input.to(DEVICE)
             decoder_targets = decoder_targets.to(DEVICE)
-            
+            initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
             logits = model(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
@@ -175,11 +175,11 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
             total_loss += loss.item() * num_tokens
             total_tokens += num_tokens
             
-            #initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
+            
             generated_ids = model.generate(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
-                #decoder_input_ids=initial_decoder_inputs, 
+                decoder_input_ids=initial_decoder_inputs, 
                 max_length=384,
                 num_beams=4,
                 early_stopping=True
@@ -224,7 +224,7 @@ def test_inference(args, model, test_loader, model_sql_path, model_record_path):
             generated_ids = model.generate(
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
-                #decoder_input_ids=initial_decoder_inputs,
+                decoder_input_ids=initial_decoder_inputs,
                 max_length=384,
                 num_beams=4,
                 early_stopping=True
