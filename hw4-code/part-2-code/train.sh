@@ -3,8 +3,8 @@
 #SBATCH --job-name=t5_train
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:a100:1
-#SBATCH --mem=64GB
-#SBATCH --time=8:00:00
+#SBATCH --mem=32GB
+#SBATCH --time=12:00:00
 #SBATCH --output=logs/t5_train_%j.out
 #SBATCH --error=logs/t5_train_%j.err
 #SBATCH --cpus-per-task=4
@@ -26,6 +26,6 @@ python train_t5.py \
     --scheduler_type cosine \
     --batch_size 8 \
     --test_batch_size 16 \
-    --experiment_name baseline_no_prefix_greedy
+    --experiment_name baseline_with_prefix_greedy
 
 
