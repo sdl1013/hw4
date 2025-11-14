@@ -3,7 +3,7 @@
 #SBATCH --job-name=t5_train
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:a100:1
-#SBATCH --mem=32GB
+#SBATCH --mem=64GB
 #SBATCH --time=03:00:00
 #SBATCH --output=logs/t5_train_%j.out
 #SBATCH --error=logs/t5_train_%j.err
@@ -24,8 +24,8 @@ python train_t5.py \
     --patience_epochs 5 \
     --num_warmup_epochs 3 \
     --scheduler_type cosine \
-    --batch_size 8 \
+    --batch_size 32 \
     --test_batch_size 16 \
-    --experiment_name baseline_prefix_11_eos
+    --experiment_name baseline_prefix_12
 
 
