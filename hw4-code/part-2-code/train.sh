@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --partition=a100_dev
+#SBATCH --partition=a100_short
 #SBATCH --job-name=t5_train
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:a100:1
