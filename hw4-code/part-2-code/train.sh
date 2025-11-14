@@ -26,6 +26,6 @@ python train_t5.py \
     --scheduler_type cosine \
     --batch_size 8 \
     --test_batch_size 16 \
-    --experiment_name baseline_with_prefix_greedy_1
+    --experiment_name baseline_no_prefix_greedy_1
 
 
