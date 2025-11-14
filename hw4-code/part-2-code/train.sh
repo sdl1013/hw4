@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --partition=a100_short
+#SBATCH --partition=a100_dev
 #SBATCH --job-name=t5_train
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:a100:1
@@ -26,6 +26,6 @@ python train_t5.py \
     --scheduler_type cosine \
     --batch_size 8 \
     --test_batch_size 16 \
-    --experiment_name baseline_with_prefix_greedy
+    --experiment_name baseline_with_prefix_greedy_1
 
 
