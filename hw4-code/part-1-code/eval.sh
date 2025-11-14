@@ -13,7 +13,7 @@ conda activate hw4-part-1-nlp
 
 nvidia-smi
 
-python3 main.py --eval --model_dir out_augmented
+python3 main.py --eval_transformed --model_dir out_augmented
 
 
 
