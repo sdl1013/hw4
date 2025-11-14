@@ -185,8 +185,8 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
                 decoder_input_ids=initial_decoder_inputs, 
-                max_length=384,
-                num_beams=4,
+                max_length=512,
+                num_beams=6,
                 early_stopping=True
             )
             
@@ -235,8 +235,8 @@ def test_inference(args, model, test_loader, model_sql_path, model_record_path):
                 input_ids=encoder_input,
                 attention_mask=encoder_mask,
                 decoder_input_ids=initial_decoder_inputs,
-                max_length=384,
-                num_beams=4,
+                max_length=512,
+                num_beams=6,
                 early_stopping=True
             )
             
@@ -284,6 +284,11 @@ def main():
     train(args, model, train_loader, dev_loader, optimizer, scheduler, start_epoch, best_f1, epochs_since_improvement)
 
     # Evaluate
+
+    model_type = 'ft' if args.finetune else 'scr'
+    checkpoint_dir = os.path.join('checkpoints', f'{model_type}_experiments', args.experiment_name)
+    args.checkpoint_dir = checkpoint_dir
+
     model, _, _, _ = load_model_from_checkpoint(args, best=True)
     model.eval()
     
