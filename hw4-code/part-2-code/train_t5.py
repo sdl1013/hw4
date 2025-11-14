@@ -177,7 +177,7 @@ def eval_epoch(args, model, dev_loader, gt_sql_pth, model_sql_path, gt_record_pa
             
             initial_decoder_inputs = torch.full(
                 (encoder_input.size(0), 1),
-                tokenizer.pad_token_id,
+                tokenizer.eos_token_id,
                 dtype=torch.long,
                 device=DEVICE
             )
@@ -227,7 +227,7 @@ def test_inference(args, model, test_loader, model_sql_path, model_record_path):
             #initial_decoder_inputs = initial_decoder_inputs.to(DEVICE)
             initial_decoder_inputs = torch.full(
                 (encoder_input.size(0), 1),
-                tokenizer.pad_token_id,
+                tokenizer.eos_token_id,
                 dtype=torch.long,
                 device=DEVICE
             )
