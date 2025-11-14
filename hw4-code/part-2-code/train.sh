@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --gres=gpu:a100:1
 #SBATCH --mem=32GB
-#SBATCH --time=04:00:00
+#SBATCH --time=03:00:00
 #SBATCH --output=logs/t5_train_%j.out
 #SBATCH --error=logs/t5_train_%j.err
 #SBATCH --cpus-per-task=4
@@ -18,14 +18,14 @@ mkdir -p logs checkpoints
 
 python train_t5.py \
     --finetune \
-    --learning_rate 1e-4 \
+    --learning_rate 5e-5 \
     --weight_decay 0.01 \
-    --max_n_epochs 20 \
-    --patience_epochs 3 \
-    --num_warmup_epochs 1 \
+    --max_n_epochs 30 \
+    --patience_epochs 5 \
+    --num_warmup_epochs 3 \
     --scheduler_type cosine \
-    --batch_size 16 \
+    --batch_size 8 \
     --test_batch_size 16 \
-    --experiment_name baseline_prefix_10
+    --experiment_name baseline_prefix_11
 
 
