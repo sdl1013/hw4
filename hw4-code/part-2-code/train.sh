@@ -18,14 +18,14 @@ mkdir -p logs checkpoints
 
 python train_t5.py \
     --finetune \
-    --learning_rate 3e-5 \
-    --weight_decay 0.01 \
+    --learning_rate 5e-5 \
+    --weight_decay 0.001 \
     --max_n_epochs 30 \
     --patience_epochs 5 \
     --num_warmup_epochs 3 \
     --scheduler_type cosine \
     --batch_size 8 \
     --test_batch_size 16 \
-    --experiment_name baseline_prefix_15
+    --experiment_name baseline_prefix_16
 
 
