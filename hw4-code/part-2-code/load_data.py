@@ -55,7 +55,7 @@ class T5Dataset(Dataset):
                 )
                 
                 #decoder_initial = tokenizer('<extra_id_0>', return_tensors='pt')
-                decoder_start_token_id = tokenizer.eos_token_id
+                decoder_start_token_id = tokenizer.pad_token_id
                 data.append({
                     'encoder_input_ids': encoder_input['input_ids'].squeeze(0),
                     'encoder_attention_mask': encoder_input['attention_mask'].squeeze(0),
@@ -92,7 +92,7 @@ class T5Dataset(Dataset):
                 )
                 
                 #decoder_initial = tokenizer('<extra_id_0>', return_tensors='pt')
-                decoder_start_token_id = tokenizer.eos_token_id
+                decoder_start_token_id = tokenizer.pad_token_id
                 data.append({
                     'encoder_input_ids': encoder_input['input_ids'].squeeze(0),
                     'encoder_attention_mask': encoder_input['attention_mask'].squeeze(0),
