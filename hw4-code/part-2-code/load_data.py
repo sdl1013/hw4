@@ -42,9 +42,14 @@ class T5Dataset(Dataset):
             for nl_query in nl_queries:
                 #input_text = f"translate English to SQL: {nl_query}"
                 #input_text = f"Generate the SQL query for the following question:\n{nl_query}\nSQL:"
+                #input_text = (
+                    #f"Generate the SQL query that correctly answers the question.\n"
+                    #f"Return only SQL.\n"
+                    #f"Question: {nl_query}\nSQL:"
+                #)
                 input_text = (
-                    f"Generate the SQL query that correctly answers the question.\n"
-                    f"Return only SQL.\n"
+                    f"Translate the question into SQL.\n"
+                    f"Output only SQL.\n"
                     f"Question: {nl_query}\nSQL:"
                 )
                 encoder_input = tokenizer(
@@ -71,9 +76,14 @@ class T5Dataset(Dataset):
             for nl_query, sql_query in zip(nl_queries, sql_queries):
                 #input_text = f"translate English to SQL: {nl_query}"
                 #input_text = f"Generate the SQL query for the following question:\n{nl_query}\nSQL:"
+                #input_text = (
+                    #f"Generate the SQL query that correctly answers the question.\n"
+                    #f"Return only SQL.\n"
+                    #f"Question: {nl_query}\nSQL:"
+                #)
                 input_text = (
-                    f"Generate the SQL query that correctly answers the question.\n"
-                    f"Return only SQL.\n"
+                    f"Translate the question into SQL.\n"
+                    f"Output only SQL.\n"
                     f"Question: {nl_query}\nSQL:"
                 )
                 encoder_input = tokenizer(
