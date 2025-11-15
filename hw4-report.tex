@@ -4,7 +4,7 @@
 
 \title{DSGA 1011: Assignment 4}
 
-\author{Full Name \\ Net ID}
+\author{Full Name: Shengduo Li \\ Net ID: sl11793}
 
 \date{}
 
@@ -14,18 +14,43 @@
 \maketitle
 % \section*{Part I. Q1} No written element, submit \texttt{out\_original.txt}  to autograder.
 \section*{Q0. 1.}
-Please provide a link to your github repository, which contains the code for both Part I and Part II. \textcolor{gray}{TODO}
+Please provide a link to your github repository, which contains the code for both Part I and Part II. 
+
+https://github.com/sdl1013/hw4.git
 \section*{Q2. 1.}
 Describe your transformation of dataset.
-\textcolor{gray}{TODO}
+
+My transformation combines both synonym replacement and typos. For synonym replacement, with a certain probability, a word is replaced by one of its WordNet synonyms, which preserves the original semantic meaning while changing the actual wording. For typos, with a small probability, one character in a word is replaced by a neighboring key on the keyboard, simulating common human typing mistakes. This transformation is reasonable because people often choose different words to express the same idea or make small typing errors, so the transformed text reflects realistic input variations.
+
 % \section*{Part I. Q2. 2. No written element, submit \texttt{out\_transformed.txt} to autograder. }
 \section*{Q3. 1}
 \textbf{Report \& Analysis}
     \begin{itemize}
-        \item Report the accuracy values for both the original and transformed test data evaluations.  \textcolor{gray}{TODO}
-        \item Analyze and discuss the following: (1) Did the model's performance on the transformed test data improve after applying data augmentation? (2) How did data augmentation affect the model's performance on the original test data? Did it enhance or diminish its accuracy? \textcolor{gray}{TODO}
-        \item Offer an intuitive explanation for the observed results, considering the impact of data augmentation on model training. \textcolor{gray}{TODO}
-        \item Explain one limitation of the data augmentation approach used here to improve performance on out-of-distribution (OOD) test sets. \textcolor{gray}{TODO}
+        \item Report the accuracy values for both the original and transformed test data evaluations.  
+
+        The accuracy for original test data evaluation is 0.93116, and the accuracy for transformed test data evaluation is 0.88312.
+
+
+        
+        \item Analyze and discuss the following: (1) Did the model's performance on the transformed test data improve after applying data augmentation? (2) How did data augmentation affect the model's performance on the original test data? Did it enhance or diminish its accuracy? 
+        
+        (1)Yes, the model's performance on the transformed test data did improve after applying data augmentation, and the accuracy increases from 0.88312 to 0.90928. (2) Data augmentation increases the model' s performance on the original test data a little bit, and the accuracy is enhanced from 0.93116 to 0.9314. 
+
+
+
+        
+        \item Offer an intuitive explanation for the observed results, considering the impact of data augmentation on model training. 
+
+        Data augmentation improves the model’s generalization by allowing it to learn from both original and transformed examples. The model becomes less sensitive to small changes in wording or spelling and focuses more on semantic meaning rather than exact token patterns. Thus, it becomes more robust to these transformations, leading to improved performance on both the original and transformed test sets.
+
+
+        
+        \item Explain one limitation of the data augmentation approach used here to improve performance on out-of-distribution (OOD) test sets. 
+
+        One limitation is that the augmented data only reflects the specific transformations we designed, which are synonym replacement and typos, so the model improves only for these types of changes. It may still fail on other OOD variations that are not covered by the augmentation.
+
+
+        
     \end{itemize}
 \section*{Part II. Q4}
 % 
@@ -38,11 +63,11 @@ Describe your transformation of dataset.
 \toprule
 Statistics Name & Train & Dev \\
 \midrule
-Number of examples & \textcolor{gray}{XXX} & \textcolor{gray}{XXX} \\
-Mean sentence length & \textcolor{gray}{XXX}& \textcolor{gray}{XXX} \\
-Mean SQL query length & \textcolor{gray}{XXX}& \textcolor{gray}{XXX}  \\
-Vocabulary size (natural language)& \textcolor{gray}{XXX}& \textcolor{gray}{XXX}  \\
-Vocabulary size (SQL)& \textcolor{gray}{XXX}& \textcolor{gray}{XXX}  \\
+Number of examples & {4225} & {466} \\
+Mean sentence length & {10.956923076923077}& {10.905579399141631} \\
+Mean SQL query length & {60.901775147928994}& {58.896995708154506}  \\
+Vocabulary size (natural language)& {868}& {444}  \\
+Vocabulary size (SQL)& {644}&{393}  \\
 \bottomrule
 \end{tabular}
 \caption{Data statistics before any pre-processing. \textcolor{gray}{You need to at least provide the statistics listed above, and can add new entries.}}
@@ -56,7 +81,15 @@ Vocabulary size (SQL)& \textcolor{gray}{XXX}& \textcolor{gray}{XXX}  \\
 Statistics Name & Train & Dev \\
 \midrule
 \multicolumn{3}{l}{\textbf{T5 fine-tuned model}} \\ % \textcolor{gray}{(T5 fine-tuning or T5 from scratch)}} \\
-\textcolor{gray}{Statistics Name} & \textcolor{gray}{XXX}& \textcolor{gray}{XXX} \\
+{Mean sentence length (tokens)} & {23.097278106508877}& {23.070815450643778} \\
+{Mean SQL query length
+(tokens)} &{217.37254437869822}&{211.05364806866953} \\
+{Vocabulary size (natural language)} &{32100}& {32100} \\
+{Vocabulary size (SQL)} & {32100}& {32100} \\
+
+
+
+
 \midrule
 \bottomrule
 \end{tabular}
@@ -80,10 +113,11 @@ Statistics Name & Train & Dev \\
 \toprule
 Design choice & Description \\
 \midrule
-Data processing & \textcolor{gray}{Describe the data processing steps you undertook, if any.} \\
-Tokenization & \textcolor{gray}{Describe how you did the tokenization for the inputs to the encoder and decoder. If you use anything else than the default T5 tokenizer, specify what you use, and why you choose to use it.} \\
-Architecture & \textcolor{gray}{Describe the components in the T5 architecture that you chose to fine-tune. Did you fine-tune the entire model, specific layers?} \\
-Hyperparameters & \textcolor{gray}{List the key hyperparameters that you used, including the learning rate, batch size, and stopping criteria.} \\
+Data processing & { I added the prefix “translate English to SQL:” to each nl query before passing it into the T5 tokenizer.} \\
+Tokenization & { I used the default \texttt{T5TokenizerFast} to tokenize both the encoder and decoder inputs. For the decoder, I shift the target SQL sequence to the right and insert the tokenizer's \texttt{<pad>} token as the start token. All sequences were dynamically padded using \texttt{pad\_sequence()} to produce the \texttt{encoder\_ids}, \texttt{decoder\_inputs}, and \texttt{decoder\_targets}.
+} \\
+Architecture & {I fine-tune the entire model.} \\
+Hyperparameters & {I trained the model using the following hyperparameter configuration: a learning rate of 5e-5, weight decay of 0.01, and a maximum of 30 epochs with early stopping after 5 patience epochs. I used 3 warmup epochs and a cosine learning rate scheduler. The batch size was 8 for training and 16 for evaluation.} \\
 \bottomrule
 \end{tabular}
 \caption{Details of the best-performing T5 model configurations (fine-tuned)}
@@ -99,6 +133,8 @@ Hyperparameters & \textcolor{gray}{List the key hyperparameters that you used, i
 \section*{Q6. }
 
 \paragraph{Quantitative Results:} 
+
+
 \begin{table}[h!]
 \centering
 \begin{tabular}{lcc}
@@ -109,7 +145,7 @@ Hyperparameters & \textcolor{gray}{List the key hyperparameters that you used, i
   \midrule
   
   \multicolumn{3}{l}{\textbf{T5 fine-tuned}} \\
-  Full model & XX.XX & XX.XX \\[5pt]
+  Full model & 1.93 & 71.27 \\[5pt]
   % Variant1 & XX.XX & XX.XX \\
   % Variant2 & XX.XX & XX.XX \\
   % Variant3 & XX.XX & XX.XX \\
@@ -117,7 +153,7 @@ Hyperparameters & \textcolor{gray}{List the key hyperparameters that you used, i
   \midrule
   \multicolumn{3}{l}{\textbf{Test Results}} \\
   \midrule
-  T5 fine-tuning & XX.XX & XX.XX \\
+  T5 fine-tuning & 0.00 & 67.02 \\
   \bottomrule
 \end{tabular}  
 \caption{Development and test results. \textcolor{gray}{Use this table to report quantitative results for both dev and test results.}}
@@ -131,11 +167,19 @@ Hyperparameters & \textcolor{gray}{List the key hyperparameters that you used, i
 \begin{landscape}
 \begin{table}
   \centering
-  \begin{tabular}{p{2cm}p{6cm}p{6cm}p{6cm}}
+  \begin{tabular}{p{2cm}p{10cm}p{6cm}p{6cm}}
     \toprule
     \textbf{Error Type}& \textbf{Example Of Error} & \textbf{Error Description} & \textbf{Statistics} \\
     \midrule
-    \textcolor{gray}{Error name}  & \textcolor{gray}{Snippet from datapoint examplifying error} & \textcolor{gray}{Describe the error in natural language} & \textcolor{gray}{Provide statistics in the form ``COUNT/TOTAL'' on the prevalence of the error. TOTAL is the number of relevant examples (e.g. number of queries, for query-level error), and COUNT is the number of examples that showed this error.}  \\
+
+  {no such column}  & {error message: no such column:flight\_stops\_1.flight\_id, SQL:\texttt{ SELECT DISTINCT flight\_1.flight\_id FROM flight flight\_1, airport\_service airport\_service\_1, city city\_1, airport\_service airport\_service\_2, city city\_2 WHERE flight\_1.from\_airport = airport\_service\_1.airport\_code AND airport\_service\_1.city\_code = city\_1.city\_code AND city\_1.city\_name = 'BOSTON' AND( flight\_1.to\_airport = airport\_service\_2.airport\_code AND airport\_service\_2.city\_code = city\_2.city\_code AND city\_2.city\_name = 'SAN FRANCISCO' AND flight\_1.flight\_id = flight\_stops\_1.flight\_id AND flight\_stop\_1.stops = 0 AND 1 = 1 )}} & {The model generates column names that do not exist in the database schema.} & {20/466}  \\
+
+    {near ")": syntax error}  & {error message: near ")": syntax error, SQL:  \texttt {SELECT DISTINCT ground\_service\_1.transport\_type FROM ground\_service ground\_service\_1, city city\_1, days days\_1, date\_day date\_day\_1 WHERE ground\_service\_1.city\_code = city\_1.city\_code AND city\_1.city\_name = 'PHILADELPHIA' AND ground\_service\_1.airport\_code = airport\_1.airport\_code AND airport\_1.airport\_code = airport\_1.airport\_code AND airport\_service\_1.city\_code = city\_2.city\_code AND city\_2.city\_name = 'PHILADELPHIA' AND ground\_service\_1.day\_name = date\_day\_1.day\_name AND date\_day\_1.year = 1991 AND date\_day\_1.month\_number = 4 AND date\_day\_1.day\_number = 23 )}
+} & {The model generates SQL queries where the number of ")" exceeds the number of "(", causing a syntax error.} & {25/466}  \\
+
+   {incomplete input error}  & error message: incomplete input, SQL: \texttt{ SELECT DISTINCT flight\_1.flight\_id FROM flight flight\_1, airport\_service airport\_service\_1, city city\_1, airport\_service airport\_service\_2, city city\_2 WHERE flight\_1.airline\_code = 'DL' AND( flight\_1.from\_airport = airport\_service\_1.airport\_code AND airport\_service\_1.city\_code = city\_1.city\_code AND city\_1.city\_name = 'DENVER' AND( flight\_1.to\_airport = airport\_service\_2.airport\_code AND airport\_service\_2.city\_code = city\_2.city\_code AND city\_2.city\_name = 'DALLAS' AND flight\_1.departure\_time > 5 )} 
+ & {The model generates SQL queries where the number of "(" exceeds the number of ")", which causes the SQL parser to treat the query as incomplete.} & {4/466}  \\
+
     
     \midrule
     &  &   & \\
@@ -149,7 +193,9 @@ Hyperparameters & \textcolor{gray}{List the key hyperparameters that you used, i
 \section*{Q7.}
 
 Provide a link to a google drive which contains a model checkpoint used to generate outputs you have submitted. 
-\textcolor{gray}{TODO}
+
+\url{https://drive.google.com/file/d/1AECxTwaijNJhAsQPIN0CM_Zpz5nlbEfO/view?usp=sharing}
+
 
 \section*{Extra Credit: }
 
